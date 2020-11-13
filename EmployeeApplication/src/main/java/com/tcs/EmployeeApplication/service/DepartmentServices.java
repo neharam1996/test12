@@ -7,7 +7,7 @@ import com.tcs.EmployeeApplication.model.Department;
 
 public interface DepartmentServices {
 	public String addDepartment(Department department);
-	public String updateDepartment(Long id);
+	public String updateDepartment(Long id,String name);
 	public String deleteDepartment(Long id);
 	public Optional<Department> findById(Long id);
 	public Optional<List<Department>> getDepartments();

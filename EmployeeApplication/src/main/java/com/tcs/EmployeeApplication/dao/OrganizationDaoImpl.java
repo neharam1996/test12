@@ -8,26 +8,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.tcs.EmployeeApplication.model.Department;
+import com.tcs.EmployeeApplication.model.Employee;
 import com.tcs.EmployeeApplication.model.Organization;
 import com.tcs.EmployeeApplication.util.DBUtils;
-
+@Repository
 public class OrganizationDaoImpl implements OrganizationDao {
-	private OrganizationDaoImpl() {
-		
-	}
-	private static OrganizationDao orgdao;
-	public static OrganizationDao getInstance() {
-		if(orgdao==null) {
-			orgdao=new OrganizationDaoImpl();
-			return orgdao;
-			}
-	 return orgdao;	}
+	@Autowired
+	DBUtils dbUtils;
 	
 	@Override
 	public String addOrganization(Organization organization) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		int result=0;
 		String addquery="insert into ORGANIZATION (id,name,address) values(?,?,?)";
@@ -60,20 +56,53 @@ public class OrganizationDaoImpl implements OrganizationDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 	}
 
 	@Override
-	public String updateOrganization(Long id) {
+	public String updateOrganization(Long id,String name) {
 		// TODO Auto-generated method stub
-		return null;
+		Connection connection=dbUtils.getConnection();
+		PreparedStatement preparedStatement=null;
+		int result=0;
+		String updatequery="update ORGANIZATION set name=? where id=?";
+		try {
+			connection.setAutoCommit(false);
+			preparedStatement=connection.prepareStatement(updatequery);
+			preparedStatement.setString(1, name);
+			preparedStatement.setLong(2, id);
+			
+			result=preparedStatement.executeUpdate();
+			if(result>0) {
+				connection.commit();
+				return "success";
+			}
+			else {
+				return "fail";
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				connection.rollback();
+			}
+			catch(SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			return "fail";
+		
+		}
+		finally {
+			dbUtils.closeConnection(connection);
+		}
 	}
 
 	@Override
 	public String deleteOrganization(Long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		int result=0;
 		String deletequery="delete from ORGANIZATION where id=?";
@@ -105,7 +134,7 @@ public class OrganizationDaoImpl implements OrganizationDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 
 	}
@@ -113,7 +142,7 @@ public class OrganizationDaoImpl implements OrganizationDao {
 	@Override
 	public Optional<Organization> findById(Long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 			Organization organization=null;
@@ -145,7 +174,7 @@ public class OrganizationDaoImpl implements OrganizationDao {
 			
 			}
 			finally {
-				DBUtils.closeConnection(connection);
+				dbUtils.closeConnection(connection);
 			}
 			return Optional.of(organization);
 				
@@ -154,7 +183,7 @@ public class OrganizationDaoImpl implements OrganizationDao {
 	@Override
 	public Optional<List<Organization>> getOrganizations() {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 		Organization organization=null;
@@ -189,10 +218,97 @@ public class OrganizationDaoImpl implements OrganizationDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		return Optional.of(organizationlist);
 		
 	}
+	public List<Department> findByOrganizationId(Long id) {
+		// TODO Auto-generated method stub
+		Connection connection=dbUtils.getConnection();
+		PreparedStatement preparedStatement=null;
+		ResultSet resultSet=null;
+		Department department=null;
+		List<Department> departmentlist=new ArrayList<Department>();
+		String findAllquery="select * from DEPARTMENT where orgnizationid=?";
+		try {
+			connection.setAutoCommit(false);
+
+			preparedStatement=connection.prepareStatement(findAllquery);
+			preparedStatement.setLong(1, id);
+			resultSet=preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				department=new Department();
+				department.setId(resultSet.getLong("id"));
+				department.setOrganizationid(resultSet.getLong("orgnizationid"));
+				department.setName(resultSet.getString("name"));
+				departmentlist.add(department);
+				
+			}
+				
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				connection.rollback();
+			}
+			catch(SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			
+		
+		}
+		finally {
+			dbUtils.closeConnection(connection);
+		}
+		return departmentlist;
+	}
+	public List<Employee> findEmpByOrganization(Long id) {
+		// TODO Auto-generated method stub
+		Connection connection=dbUtils.getConnection();
+		PreparedStatement preparedStatement=null;
+		ResultSet resultSet=null;
+		Employee employee=null;
+		List<Employee> employeelist=new ArrayList<Employee>();
+		String findOrgquery="select * from EMPLOYEE where organizationid=?";
+		try {
+			connection.setAutoCommit(false);
+
+			preparedStatement=connection.prepareStatement(findOrgquery);
+			preparedStatement.setLong(1, id);
+			
+			resultSet=preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				employee=new Employee();
+				employee.setId(resultSet.getLong("id"));
+				employee.setOrganizationid(resultSet.getLong("organizationid"));
+				employee.setDepartmentid(resultSet.getLong("departmentid"));
+				employee.setName(resultSet.getString("name"));
+				employee.setAge(resultSet.getInt("age"));
+				employee.setPosition(resultSet.getString("position"));
+				employeelist.add(employee);
+				
+			}
+				
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				connection.rollback();
+			}
+			catch(SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			
+		
+		}
+		finally {
+			dbUtils.closeConnection(connection);
+		}
+		return employeelist;
+		
+	}
+
+
 
 }

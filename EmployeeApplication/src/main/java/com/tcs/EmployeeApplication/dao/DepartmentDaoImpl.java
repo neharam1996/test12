@@ -8,26 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.tcs.EmployeeApplication.model.Department;
-import com.tcs.EmployeeApplication.util.DBUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+import com.tcs.EmployeeApplication.model.Department;
+import com.tcs.EmployeeApplication.model.Employee;
+import com.tcs.EmployeeApplication.util.DBUtils;
+@Repository
 public class DepartmentDaoImpl implements DepartmentDao {
-	private DepartmentDaoImpl() {
-		
-	}
-	private static DepartmentDao depdao;
-	public static DepartmentDao getInstance() {
-		if(depdao==null) {
-			depdao=new DepartmentDaoImpl();
-			return depdao;
-			}
-	 return depdao;
-		
-	}
+	@Autowired
+	DBUtils dbUtils;
 	@Override
 	public String addDepartment(Department department) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		int result=0;
 		String addquery="insert into DEPARTMENT (id,orgnizationid,name) values(?,?,?)";
@@ -59,22 +53,55 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 	
 		
 	}
 
 	@Override
-	public String updateDepartment(Long id) {
+	public String updateDepartment(Long id,String name) {
 		// TODO Auto-generated method stub
-		return null;
+		Connection connection=dbUtils.getConnection();
+		PreparedStatement preparedStatement=null;
+		int result=0;
+		String updatequery="update  DEPARTMENT set name=? where id=?";
+		try {
+			connection.setAutoCommit(false);
+			preparedStatement=connection.prepareStatement(updatequery);
+			preparedStatement.setString(1, name);
+			preparedStatement.setLong(2, id);
+			
+			result=preparedStatement.executeUpdate();
+			if(result>0) {
+				connection.commit();
+				return "success";
+			}
+			else {
+				return "fail";
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				connection.rollback();
+			}
+			catch(SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			return "fail";
+		
+		}
+		finally {
+			dbUtils.closeConnection(connection);
+		}
 	}
 
 	@Override
 	public String deleteDepartment(Long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		int result=0;
 		String deletequery="delete from DEPARTMENT where id=?";
@@ -106,14 +133,14 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 	}
 
 	@Override
 	public Optional<Department> findById(Long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 			Department department=null;
@@ -145,7 +172,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 			
 			}
 			finally {
-				DBUtils.closeConnection(connection);
+				dbUtils.closeConnection(connection);
 			}
 			return Optional.of(department);
 				
@@ -155,7 +182,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	@Override
 	public Optional<List<Department>> getDepartments() {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 		Department department=null;
@@ -189,7 +216,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		return Optional.of(departmentlist);
 		
@@ -198,7 +225,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	@Override
 	public Optional<List<Department>> findByOrganizationId(Long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 		Department department=null;
@@ -232,9 +259,55 @@ public class DepartmentDaoImpl implements DepartmentDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		return Optional.of(departmentlist);
+	}
+	
+	public List<Employee> findEmpByDepartment(Long id) {
+		// TODO Auto-generated method stub
+		Connection connection=dbUtils.getConnection();
+		PreparedStatement preparedStatement=null;
+		ResultSet resultSet=null;
+		Employee employee=null;
+		List<Employee> employeelist=new ArrayList<Employee>();
+		String findOrgquery="select * from EMPLOYEE where departmentid=?";
+		try {
+			connection.setAutoCommit(false);
+
+			preparedStatement=connection.prepareStatement(findOrgquery);
+			preparedStatement.setLong(1, id);
+			
+			resultSet=preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				employee=new Employee();
+				employee.setId(resultSet.getLong("id"));
+				employee.setOrganizationid(resultSet.getLong("organizationid"));
+				employee.setDepartmentid(resultSet.getLong("departmentid"));
+				employee.setName(resultSet.getString("name"));
+				employee.setAge(resultSet.getInt("age"));
+				employee.setPosition(resultSet.getString("position"));
+				employeelist.add(employee);
+				
+			}
+				
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				connection.rollback();
+			}
+			catch(SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			
+		
+		}
+		finally {
+			dbUtils.closeConnection(connection);
+		}
+		return employeelist;
+		
 	}
 
 }

@@ -7,7 +7,7 @@ import com.tcs.EmployeeApplication.model.Organization;
 
 public interface OrganizationServices {
 	public String addOrganization(Organization organization);
-	public String updateOrganization(Long id);
+	public String updateOrganization(Long id,String name);
 	public String deleteOrganization(Long id);
 	public Optional<Organization> findById(Long id);
 	public Optional<List<Organization>> getOrganizations();

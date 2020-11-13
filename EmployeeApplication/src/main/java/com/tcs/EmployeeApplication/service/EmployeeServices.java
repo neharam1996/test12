@@ -7,7 +7,7 @@ import com.tcs.EmployeeApplication.model.Employee;
 
 public interface EmployeeServices {
 	public String addEmployee(Employee employee);
-	public String updateEmployee(long id);
+	public String updateEmployee(long id,String name);
 	public String deleteEmployee(long id);
 	public Optional<Employee> findById(long id);
 	public Optional<List<Employee>> getEmployees();

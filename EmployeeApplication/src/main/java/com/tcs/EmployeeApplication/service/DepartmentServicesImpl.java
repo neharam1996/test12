@@ -3,34 +3,32 @@ package com.tcs.EmployeeApplication.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.tcs.EmployeeApplication.dao.DepartmentDao;
-import com.tcs.EmployeeApplication.dao.DepartmentDaoImpl;
-import com.tcs.EmployeeApplication.model.Department;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.tcs.EmployeeApplication.dao.DepartmentDao;
+import com.tcs.EmployeeApplication.model.Department;
+import com.tcs.EmployeeApplication.model.Employee;
+@Service
 public class DepartmentServicesImpl implements DepartmentServices {
-	private DepartmentServicesImpl() {
+	@Autowired
+	DepartmentDao deptdao;
+
+	
+	
 		
-	}
-	private static DepartmentServices depservices;
-	public static DepartmentServices getInstance() {
-		if(depservices==null) {
-			depservices=new DepartmentServicesImpl();
-			return depservices;
-			}
-	 return depservices;
-		
-	}
-	DepartmentDao deptdao=DepartmentDaoImpl.getInstance();
-	@Override
 	public String addDepartment(Department department) {
 		// TODO Auto-generated method stub
+		Long id=department.getId();
+		List<Employee> employees=deptdao.findEmpByDepartment(id);
+		department.setEmployees(employees);
 		return deptdao.addDepartment(department);
 	}
 
 	@Override
-	public String updateDepartment(Long id) {
+	public String updateDepartment(Long id,String name) {
 		// TODO Auto-generated method stub
-		return deptdao.updateDepartment(id);
+		return deptdao.updateDepartment(id,name);
 	}
 
 	@Override

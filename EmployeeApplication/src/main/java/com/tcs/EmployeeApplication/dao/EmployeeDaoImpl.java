@@ -8,26 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import com.tcs.EmployeeApplication.model.Employee;
 import com.tcs.EmployeeApplication.util.DBUtils;
-
+@Repository
 public class EmployeeDaoImpl implements EmployeeDao {
-	private EmployeeDaoImpl() {
-		
-	}
-	private static EmployeeDao empdao;
-	public static EmployeeDao getInstance() {
-		if(empdao==null) {
-			empdao=new EmployeeDaoImpl();
-			return empdao;
-			}
-	 return empdao;
-		
-	}
-
+	@Autowired
+	DBUtils dbUtils;
 	public String addEmployee(Employee employee) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		int result=0;
 		String addquery="insert into EMPLOYEE (id,organizationid,departmentid,name,age,position) values(?,?,?,?,?,?)";
@@ -62,18 +54,51 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 	}
 
-	public String updateEmployee(long id) {
+	public String updateEmployee(long id,String name) {
 		// TODO Auto-generated method stub
-		return null;
+		Connection connection=dbUtils.getConnection();
+		PreparedStatement preparedStatement=null;
+		int result=0;
+		String updatequery="update  EMPLOYEE set name=? where id=?";
+		try {
+			connection.setAutoCommit(false);
+			preparedStatement=connection.prepareStatement(updatequery);
+			preparedStatement.setString(1, name);
+			preparedStatement.setLong(2, id);
+			
+			result=preparedStatement.executeUpdate();
+			if(result>0) {
+				connection.commit();
+				return "success";
+			}
+			else {
+				return "fail";
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			try {
+				connection.rollback();
+			}
+			catch(SQLException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
+			return "fail";
+		
+		}
+		finally {
+			dbUtils.closeConnection(connection);
+		}
 	}
 
 	public String deleteEmployee(long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		int result=0;
 		String deletequery="delete from EMPLOYEE where id=?";
@@ -105,14 +130,14 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		
 	}
 
 	public Optional<Employee> findById(long id) {
 		// TODO Auto-generated method stub
-	Connection connection=DBUtils.getConnection();
+	Connection connection=dbUtils.getConnection();
 	PreparedStatement preparedStatement=null;
 	ResultSet resultSet=null;
 		Employee employee=null;
@@ -147,7 +172,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		return Optional.of(employee);
 			
@@ -155,7 +180,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
 	public Optional<List<Employee>> getEmployees() {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 		Employee employee=null;
@@ -192,7 +217,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		return Optional.of(employeelist);
 		
@@ -200,7 +225,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
 	public Optional<List<Employee>> findByOrganization(long id) {
 		// TODO Auto-generated method stub
-		Connection connection=DBUtils.getConnection();
+		Connection connection=dbUtils.getConnection();
 		PreparedStatement preparedStatement=null;
 		ResultSet resultSet=null;
 		Employee employee=null;
@@ -238,10 +263,11 @@ public class EmployeeDaoImpl implements EmployeeDao {
 		
 		}
 		finally {
-			DBUtils.closeConnection(connection);
+			dbUtils.closeConnection(connection);
 		}
 		return Optional.of(employeelist);
 		
 	}
+	
 
 }
