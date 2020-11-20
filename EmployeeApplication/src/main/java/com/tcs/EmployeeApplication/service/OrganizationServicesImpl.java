@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tcs.EmployeeApplication.dao.DepartmentDao;
 import com.tcs.EmployeeApplication.dao.DepartmentDaoImpl;
@@ -13,43 +14,51 @@ import com.tcs.EmployeeApplication.dao.OrganizationDaoImpl;
 import com.tcs.EmployeeApplication.model.Department;
 import com.tcs.EmployeeApplication.model.Employee;
 import com.tcs.EmployeeApplication.model.Organization;
+import com.tcs.EmployeeApplication.repository.OrganizationRepository;
 @Service
 public class OrganizationServicesImpl implements OrganizationServices {
 	@Autowired
-	OrganizationDao orgdao;
+	OrganizationRepository organizationRepository; 
 	@Override
 	public String addOrganization(Organization organization) {
 		// TODO Auto-generated method stub
-		Long id=organization.getId();
+		/*Long id=organization.getId();
 		List<Employee> employees=orgdao.findEmpByOrganization(id);
 		List<Department> departments=orgdao.findByOrganizationId(id);
 		organization.setDepartments(departments);
-		organization.setEmployees(employees);
-		return orgdao.addOrganization(organization);
+		organization.setEmployees(employees);*/
+		Organization org=null;
+		try {
+			org=organizationRepository.save(organization);
+			return "success";
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return "fail";
+		}
 	}
 
-	@Override
-	public String updateOrganization(Long id,String name) {
-		// TODO Auto-generated method stub
-		return orgdao.updateOrganization(id,name);
-	}
+	
 
 	@Override
 	public String deleteOrganization(Long id) {
 		// TODO Auto-generated method stub
-		return orgdao.deleteOrganization(id);
+		
+		organizationRepository.deleteById(id);
+		return "success";
 	}
 
 	@Override
 	public Optional<Organization> findById(Long id) {
 		// TODO Auto-generated method stub
-		return orgdao.findById(id);
+		return organizationRepository.findById(id);
 	}
 
 	@Override
 	public Optional<List<Organization>> getOrganizations() {
 		// TODO Auto-generated method stub
-		return orgdao.getOrganizations();
+		
+		return Optional.ofNullable(organizationRepository.findAll());
 	}
 
 }

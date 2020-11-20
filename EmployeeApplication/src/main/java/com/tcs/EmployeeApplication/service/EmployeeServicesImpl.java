@@ -9,39 +9,48 @@ import org.springframework.stereotype.Service;
 import com.tcs.EmployeeApplication.dao.EmployeeDao;
 import com.tcs.EmployeeApplication.dao.EmployeeDaoImpl;
 import com.tcs.EmployeeApplication.model.Employee;
+import com.tcs.EmployeeApplication.repository.EmployeeRepository;
 @Service
 public class EmployeeServicesImpl implements EmployeeServices {
+	
 	@Autowired
-	EmployeeDao empdao;
+	EmployeeRepository employeeRepository;
 
 	public String addEmployee(Employee employee) {
 		// TODO Auto-generated method stub
-		return empdao.addEmployee(employee);
+		Employee employee2=null;
+		try {
+			employee2=employeeRepository.save(employee);
+			return "success";
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return "fail";
+		}
+		
 	}
 
-	public String updateEmployee(long id,String name) {
-		// TODO Auto-generated method stub
-		return empdao.updateEmployee(id,name);
-	}
+	
 
 	public String deleteEmployee(long id) {
 		// TODO Auto-generated method stub
-		return empdao.deleteEmployee(id);
+		employeeRepository.deleteById(id);
+				return "success";
 	}
 
 	public Optional<Employee> findById(long id) {
 		// TODO Auto-generated method stub
-		return empdao.findById(id);
+		return employeeRepository.findById(id);
 	}
 
 	public Optional<List<Employee>> getEmployees() {
 		// TODO Auto-generated method stub
-		return empdao.getEmployees();
+		return Optional.ofNullable(employeeRepository.findAll());
 	}
 
 	public Optional<List<Employee>> findByOrganization(long id) {
 		// TODO Auto-generated method stub
-		return empdao.findByOrganization(id);
+		return employeeRepository.findByOrganizationid(id);
 	}
 
 }

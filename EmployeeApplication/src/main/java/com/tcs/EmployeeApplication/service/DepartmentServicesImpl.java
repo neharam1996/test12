@@ -6,53 +6,60 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.tcs.EmployeeApplication.dao.DepartmentDao;
 import com.tcs.EmployeeApplication.model.Department;
-import com.tcs.EmployeeApplication.model.Employee;
+
+import com.tcs.EmployeeApplication.repository.DepartmentRepository;
+
 @Service
 public class DepartmentServicesImpl implements DepartmentServices {
-	@Autowired
-	DepartmentDao deptdao;
+	
 
 	
+	@Autowired
+	DepartmentRepository departmentRepository;
 	
 		
 	public String addDepartment(Department department) {
 		// TODO Auto-generated method stub
-		Long id=department.getId();
+		/*Long id=department.getId();
 		List<Employee> employees=deptdao.findEmpByDepartment(id);
-		department.setEmployees(employees);
-		return deptdao.addDepartment(department);
+		department.setEmployees(employees);*/
+		Department department1=null;
+		try {
+			department1=departmentRepository.save(department);
+			return "success";
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return "fail";
+		}
+	
 	}
 
-	@Override
-	public String updateDepartment(Long id,String name) {
-		// TODO Auto-generated method stub
-		return deptdao.updateDepartment(id,name);
-	}
-
+	
 	@Override
 	public String deleteDepartment(Long id) {
 		// TODO Auto-generated method stub
-		return deptdao.deleteDepartment(id);
+		departmentRepository.deleteById(id);
+		return "success";
 	}
 
 	@Override
 	public Optional<Department> findById(Long id) {
 		// TODO Auto-generated method stub
-		return deptdao.findById(id);
+		return departmentRepository.findById(id);
 	}
 
 	@Override
 	public Optional<List<Department>> getDepartments() {
 		// TODO Auto-generated method stub
-		return deptdao.getDepartments();
+		return Optional.ofNullable(departmentRepository.findAll());
 	}
 
 	@Override
 	public Optional<List<Department>> findByOrganizationId(Long id) {
 		// TODO Auto-generated method stub
-		return deptdao.findByOrganizationId(id);
+		return departmentRepository.findByOrganizationid(id);
 	}
 
 }
